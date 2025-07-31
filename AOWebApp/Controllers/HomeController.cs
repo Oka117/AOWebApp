@@ -15,6 +15,7 @@ namespace AOWebApp.Controllers
 
         public IActionResult Index()
         {
+            /*throw new Exception("This is an error");*/
             return View();
         }
 
@@ -22,6 +23,20 @@ namespace AOWebApp.Controllers
         {
             return View();
         }
+        
+        public IActionResult Test()
+        {
+            // get the id from the Request url
+            var id = Request.RouteValues["id"];
+
+            // pass the id value to the view
+            ViewData.Add("id", id); // old way using dictionary of object values
+            ViewBag.id = id; // new way using dynamic object properties
+
+
+            return View();
+        }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
