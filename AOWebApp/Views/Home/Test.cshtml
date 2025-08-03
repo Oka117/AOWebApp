@@ -3,9 +3,17 @@
 *@
 @{
     ViewData["Title"] = "Test";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1> Test </h1>
+<h1>Test</h1>
 
 <p>ViewBag.id2: @ViewBag.id</p>
-<p>ViewData["id"]: @ViewData["id"]</p>
+<p>ViewBag.searchText: @ViewBag.searchText</p>
+@* <p>ViewData["id"]: @ViewData["id"]</p> *@
+
+<form method="post" action="/Home/test">
+    <input type ="text" name="text" />
+    <button type="submit">Save</button>
+
+</form>

@@ -1,0 +1,68 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Razor Test";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var i = 1;
+    var j = 2;
+
+
+    var array = new string[] { "one", "two", "three" };
+    
+    var coordinates = new[]
+    {
+        new { x = 1, y = 11 },
+        new { x = 2, y = 22},
+        new { x = 3, y = 33 }
+    };
+}
+<h1>Razor Test</h1>
+<h2>1. Create two variables.  Using @@razor, add the values together and print out their sum.</h2>
+<p>Variable i is: @i</p>
+<p>Variable j is: @j</p>
+<p>Variable i + j = @(i+j)</p>
+
+<h2>2. Create an array of strings. Using @@razor code, print out each value in the array in an un-ordered list using @@foreach.</h2>
+<ul>
+
+    @foreach (var str in array)
+    {
+        <li>@str</li>
+    }
+</ul>
+
+<h2>3. Create an array of anonymous coordinate objects containing x and y values (hint use new{x=1, y=1} to create the object).  Using @@razor code, print out the values of each object in the array as a list of coordinates.</h2>
+<ul>
+    @foreach (var pos in coordinates)
+    {
+        <li>Coordinate: x = @pos.x, y = @pos.y</li>
+    }
+</ul>
+
+<h2>4. Use a anchor tag hyperlink and a HTML form to pass parameters to the Action in the Controller and then when activated show these values on the page.  Use these to pass a value for the {id} url route segment, a query string value and a form value.  Where possible use html tag helpers.</h2>
+<div>@Html.ActionLink("ActionLink","RazorTest")</div>
+
+<div><a href="../Home/RazorTest/1111?/query=href&form=hreff">A href</a></div>
+
+<div><a asp-action="RazorTest" asp-controller="Home" asp-route-id="111">Tag Helper</a></div>
+
+ @* asp-route-query="SUBMIT" asp-route-id="117" asp-route-form="formValue" *@
+<form method="get" asp-controller="Home" asp-action="RazorTest">
+    <label for="query">Name:</label>
+    <input type="text" name="query" />
+    <label for="id">ID:</label>
+    <input type="text" name="id"/>
+    <label for="form">FormValue:</label>
+    <input type="text" name="form" />
+    <button type="submit">Save</button>
+</form>
+
+
+<p>ViewBag.Id: @ViewBag.id</p>
+<p>ViewBag.query: @ViewBag.query</p>
+<p>ViewBag.form: @ViewBag.form</p>
+@* <p>ViewData["id"]: @ViewData["id"]</p> *@
+
+
+
