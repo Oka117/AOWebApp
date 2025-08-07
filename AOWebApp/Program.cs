@@ -10,6 +10,11 @@ builder.Services.AddDbContext<AOWebAppContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AOWebAppContext") ??
     throw new InvalidOperationException("Connection string 'AOWebAppContext' not found.")));
 
+// AmazonOrders2025Context
+builder.Services.AddDbContext<AmazonOrders2025Context>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AmazonOrders2025Context") ??
+    throw new InvalidOperationException("Connection string 'AmazonOrders2025Context' not found.")));
+
 // This builder object gets created at runtime. Use this object to add services to the container.
 builder.Services.AddControllersWithViews();
 
