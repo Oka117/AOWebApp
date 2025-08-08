@@ -4,12 +4,31 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
-
+@* 
+<h1>Index</h1> *@
+<h2 class="text-center my-4">Shop Items</h2>
+@* 
 <p>
     <a asp-action="Create">Create New</a>
+</p> *@
+
+<p>
+    <a asp-action="Create" class="btn btn-outline-primary mb-3">Create New</a>
 </p>
-<table class="table">
+<br />
+<form method="post">
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Item search</span>
+        <input type = "text" class="form-control" name="searchText" title="search item name" maxlength="100" placeholder="Type here..." 
+        aria-label="Item search Input" aria-describedby="inputGroup-sizing-default" />
+    </div>
+
+    <input type="submit" class="btn btn-outline-primary" value="Submit"/>
+    <a asp-action="Index" class="btn btn-outline-danger">Reset</a>
+</form>
+
+
+@* <table class="table">
     <thead>
         <tr>
             <th>
@@ -56,4 +75,50 @@
         </tr>
 }
     </tbody>
-</table>
+</table> *@
+<div class="container">
+    <div class="row row-cols-3 small">
+        @foreach (var item in Model)
+        {
+            <div class="col card container-sm" sytle="width: 18rem;">
+
+                <div class="card-body">
+                    <h5 class="card-title"><strong>@item.ItemName</strong></h5>
+                    <p class="card-text">Category: @item.Category.CategoryName</p>
+                    <p class="card-text">
+                        Description:@(item.ItemDescription?.Length > 100
+                                            ? item.ItemDescription.Substring(0, 100) + "..."
+                                            : item.ItemDescription)
+                </p>
+                <p class="card-text">Cost: @item.ItemCost.ToString("C")</p>
+            
+            <img src="@item.ItemImage" class="card-img-bottom" alt="@item.ItemName" />
+            <a asp-controller="Items" asp-action="Details" asp-route-id="@item.ItemId" class="btn btn-outline-primary">
+                View Item Detail
+            </a>
+                </div>
+            </div>
+          }
+    </div>
+
+</div>
+
+
+@* <div class="row">
+    @foreach (var item in Model)
+    {
+        <div class="col-4">
+            <div class="card" style="width: 22rem;">
+                <img src="@item.ItemImage" class="card-img-top" alt="Image of @item.ItemName">
+                <div class="card-body">
+                    <h5 class="card-title"> @item.ItemName</h5>
+                    <p class="card-text">@Html.DisplayFor(m => item.ItemDescription)</p>
+                    <p class="card-text">@Html.DisplayFor(m => item.Category.CategoryName)</p>
+                    <a asp-action="Details" asp-route-id="@item.ItemId" class="btn btn-outline-primary">View Item Detail</a>
+                </div>
+            </div>
+        </div>
+
+    }
+
+</div> *@
