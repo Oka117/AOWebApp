@@ -1,16 +1,12 @@
-﻿ @model IEnumerable<AOWebApp.Models.Item>
+﻿@* @model IEnumerable<AOWebApp.Models.Item> *@
+@model IEnumerable<dynamic>
 
 @{
     ViewData["Title"] = "Index";
 }
 
-@* 
-<h1>Index</h1> *@
-<h2 class="text-center my-4">Shop Items</h2>
-@* 
-<p>
-    <a asp-action="Create">Create New</a>
-</p> *@
+
+<h1 class="h2.Bootstrap heading text-center">Shop Items</h1>
 
 <p>
     <a asp-action="Create" class="btn btn-outline-primary mb-3">Create New</a>
@@ -18,14 +14,42 @@
 <br />
 <form method="post">
     <div class="input-group mb-3">
-        <span class="input-group-text" id="inputGroup-sizing-default">Item search</span>
-        <input type = "text" class="form-control" name="searchText" title="search item name" maxlength="100" placeholder="Type here..." 
-        aria-label="Item search Input" aria-describedby="inputGroup-sizing-default" />
+        <span class="input-group-text" id="inputGroup-sizing-default">Item Search</span>
+        <select name="CategoryId" class="form-control" asp-items="@(ViewBag.Categories)">
+            <option value="">All categories...</option>
+        </select>
+        <input type = "text" class="form-control" name="searchText" title="Search by item name. Max 100 chars." 
+        value="@ViewData["formValue"]" maxlength="100" placeholder="Type here..." aria-label="Item search Input" aria-describedby="inputGroup-sizing-default" />
     </div>
 
     <input type="submit" class="btn btn-outline-primary" value="Submit"/>
     <a asp-action="Index" class="btn btn-outline-danger">Reset</a>
 </form>
+<br/>
+<br/>
+<div class="container">
+    <div class="row row-cols-3 small">
+        @foreach (var item in Model)
+        {
+            <div class="col card container-sm" style="width: 18rem;">
+
+                <div class="card-body">
+                    <h5 class="card-title"><strong>@item.itemName</strong></h5>
+                    @* <p class="card-text">Category: @item.Category.CategoryName</p> *@
+                    <p class="card-text">Description:@item.itemDescription</p>
+                    <p class="card-text">Cost: @item.itemCost</p>
+            
+                    <img src="@item.itemImage" class="card-img-bottom" alt="@item.itemName" />
+                    <p class="card-text">Rate @item.itemStars from @item.itemReviews reviews.</p>
+                <a asp-controller="Items" asp-action="Details" asp-route-id="@item.itemId" class="btn btn-outline-primary">
+                View Item Detail
+                </a>
+                </div>
+            </div>
+          }
+    </div>
+
+</div>
 
 
 @* <table class="table">
@@ -76,34 +100,6 @@
 }
     </tbody>
 </table> *@
-<div class="container">
-    <div class="row row-cols-3 small">
-        @foreach (var item in Model)
-        {
-            <div class="col card container-sm" sytle="width: 18rem;">
-
-                <div class="card-body">
-                    <h5 class="card-title"><strong>@item.ItemName</strong></h5>
-                    <p class="card-text">Category: @item.Category.CategoryName</p>
-                    <p class="card-text">
-                        Description:@(item.ItemDescription?.Length > 100
-                                            ? item.ItemDescription.Substring(0, 100) + "..."
-                                            : item.ItemDescription)
-                </p>
-                <p class="card-text">Cost: @item.ItemCost.ToString("C")</p>
-            
-            <img src="@item.ItemImage" class="card-img-bottom" alt="@item.ItemName" />
-            <a asp-controller="Items" asp-action="Details" asp-route-id="@item.ItemId" class="btn btn-outline-primary">
-                View Item Detail
-            </a>
-                </div>
-            </div>
-          }
-    </div>
-
-</div>
-
-
 @* <div class="row">
     @foreach (var item in Model)
     {
