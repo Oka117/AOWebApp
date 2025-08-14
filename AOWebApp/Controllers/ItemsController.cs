@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using AOWebApp.Data;
 using AOWebApp.Models;
+using AOWebApp.ViewModel;
 
 namespace AOWebApp.Controllers
 {
@@ -20,7 +21,9 @@ namespace AOWebApp.Controllers
         }
 
         // GET: Items
-        public async Task<IActionResult> Index(string SearchText, int? CategoryId)
+        [HttpGet]
+        [HttpPost]
+        public async Task<IActionResult> Index(ItemSearchViewModel isvm)
         {
             #region  CategoriesQuery
 
@@ -34,32 +37,47 @@ namespace AOWebApp.Controllers
                     ic.CategoryName,
                 }).ToList();
             #endregion
-            ViewBag.CategoryList = new SelectList(Categories, 
+            isvm.CategoryList = new SelectList(Categories, 
                 nameof(ItemCategory.CategoryId),
-                nameof(ItemCategory.CategoryName));
+                nameof(ItemCategory.CategoryName),
+                isvm.CategoryId);
 
             #region ItemQuery
-            ViewBag.SearchText = SearchText;
+            //ViewBag.SearchText = isvm.SearchText;
             var amazonOrdersContext = _context.Items
                 .Include(i => i.Category)
                 .OrderBy(i => i.ItemName)
                 .AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(SearchText))
+            if (!string.IsNullOrWhiteSpace(isvm.SearchText))
             {
                 amazonOrdersContext= amazonOrdersContext
-                    .Where(i => i.ItemName.Contains(SearchText));
+                    .Where(i => i.ItemName.Contains(isvm.SearchText));
             }
 
-            if(CategoryId != null)
+            if(isvm.CategoryId != null)
             {
                 amazonOrdersContext = amazonOrdersContext
-                    .Where(i => i.Category.CategoryId == CategoryId);
+                    .Where(i => i.Category.CategoryId == isvm.CategoryId);
                 
             }
             #endregion
+            isvm.ItemList = await amazonOrdersContext
+                .Select(i => new ItemDetail
+                {
+                    TheItem = i,
+                    ReviewCount = (i.Reviews != null ? i.Reviews.Count() : 0),
+                    AverageRating = (i.Reviews != null && i.Reviews.Count() > 0 ? i.Reviews.Select(r => r.Rating).Average() : 0)
+                }).ToListAsync();
+            //var amazonOrdersContextVM = new ItemSearchViewModel
+            //{
+            //    SearchText = isvm.SearchText,
+            //    CategoryId = isvm.CategoryId,
+            //    CategoryList = new SelectList(Categories, nameof(ItemCategory.CategoryId), nameof(ItemCategory.CategoryName), isvm.CategoryId),
+            //    ItemList = await amazonOrdersContext.ToListAsync()
+            //};
 
-            return View(await amazonOrdersContext.ToListAsync());
+            return View(isvm);
 
         }
 

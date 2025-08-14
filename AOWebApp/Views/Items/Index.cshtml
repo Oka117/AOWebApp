@@ -1,4 +1,4 @@
-﻿@model AOWebApp.ViewModel.ItemSearchViewModel
+﻿@model AOWebApp.ViewModel.ItemSearchViewModel;
 @* @model IEnumerable<AOWebApp.Models.Item> *@
 @* @model IEnumerable<dynamic> *@
 
@@ -16,11 +16,11 @@
 <form method="post">
     <div class="input-group mb-3">
         <span class="input-group-text" id="inputGroup-sizing-default">Item Search</span>
-        <select name="CategoryId" class="form-control" asp-items="@(ViewBag.CategoryList)">
+        <select asp-for="CategoryId" asp-items="Model.CategoryList" class="form-control">
             <option value="">All categories...</option>
         </select>
-        <input type = "text" class="form-control" name="searchText" title="Search by item name. Max 100 chars." 
-        value="@ViewData["formValue"]" maxlength="100" placeholder="Type here..." aria-label="Item search Input" aria-describedby="inputGroup-sizing-default" />
+        <input asp-for="SearchText" class="form-control" title="Search by item name. Max 100 chars." maxlength="100" placeholder="Type here..."
+               aria-label="Item search Input" aria-describedby="inputGroup-sizing-default"/>
     </div>
 
     <input type="submit" class="btn btn-outline-primary" value="Submit"/>
@@ -28,33 +28,57 @@
 </form>
 <br/>
 <br/>
-@if(ViewBag.SearchText != null && Model.Count() > 0)
+
+@{
+    bool isSearch = false;
+    int count = 0;
+    if (Model != null)
+    {
+        isSearch = !string.IsNullOrWhiteSpace(Model.SearchText) || Model.CategoryId.HasValue;
+        if (Model.ItemList != null)
+        {
+            count = Model.ItemList.Count;
+        }
+    }
+
+}
+
+
+@if(isSearch && count > 0)
 {   
     <p>
-        Your search returned @Model.Count() matching item@(Model.Count() != 1? "s":"")
+        Your search returned @count matching item@(count != 1? "s":"")
     </p>
 
 } 
-else if (ViewBag.SearchText != null && Model.Count() <= 0)
+else if (isSearch && count <= 0)
 {
-    <p>Showing @Model.Count() items</p>
+    <p>Showing @count items</p>
     <h5 class="text-danger">Ooops, no items matched your search..</h5>
 }
 <div class="container">
     <div class="row row-cols-3 small">
-        @foreach (var item in Model)
+        @foreach (var item in Model.ItemList)
         {
             <div class="col card container-sm" style="width: 18rem;">
 
                 <div class="card-body">
-                    <h5 class="card-title"><strong>@item.ItemName</strong></h5>
-                    <p class="card-text">Category: @item.Category.CategoryName</p>
-                    <p class="card-text">Description:@item.ItemDescription</p>
-                    <p class="card-text">Cost: @item.ItemCost</p>
-            
-                    <img src="@item.ItemImage" class="card-img-bottom" alt="@item.ItemName" />
+                    <h5 class="card-title"><strong>@item.TheItem.ItemName</strong></h5>
+                    <p class="card-text">Category: @item.TheItem.Category.CategoryName</p>
+                    <p class="card-text">Description:@item.TheItem.ItemDescription</p>
+                    <p class="card-text">Cost: @item.TheItem.ItemCost</p>
+                    <p class="card-text">Rating: @if (item.ReviewCount > 0)
+                        {
+                            <span>@item.AverageRating.ToString("F2") across @item.ReviewCount Reviews</span>
+                        }
+                        else
+                        {
+                            <span>This item has not been reviewed</span>
+                        }
+                    </p>
+                    <img src="@item.TheItem.ItemImage" class="card-img-bottom" alt="@item.TheItem.ItemName" />
 @*                     <p class="card-text">Rate @item.ItemStars from @item.ItemReviews reviews.</p> *@
-                <a asp-controller="Items" asp-action="Details" asp-route-id="@item.ItemId" class="btn btn-outline-primary">
+                    <a asp-controller="Items" asp-action="Details" asp-route-id="@item.TheItem.ItemId" class="btn btn-outline-primary">
                 View Item Detail
                 </a>
                 </div>
