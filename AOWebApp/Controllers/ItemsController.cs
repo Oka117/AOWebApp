@@ -20,6 +20,49 @@ namespace AOWebApp.Controllers
         }
 
         // GET: Items
+        public async Task<IActionResult> Index(string SearchText, int? CategoryId)
+        {
+            #region  CategoriesQuery
+
+            var Categories = _context.ItemCategories
+                .Where(ic => ic.ParentCategoryId.HasValue)
+                // OR .Where(ic => ic.ParentCategoryId == null)
+                .OrderBy(ic => ic.CategoryName)
+                .Select(ic => new
+                {
+                    ic.CategoryId,
+                    ic.CategoryName,
+                }).ToList();
+            #endregion
+            ViewBag.CategoryList = new SelectList(Categories, 
+                nameof(ItemCategory.CategoryId),
+                nameof(ItemCategory.CategoryName));
+
+            #region ItemQuery
+            ViewBag.SearchText = SearchText;
+            var amazonOrdersContext = _context.Items
+                .Include(i => i.Category)
+                .OrderBy(i => i.ItemName)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                amazonOrdersContext= amazonOrdersContext
+                    .Where(i => i.ItemName.Contains(SearchText));
+            }
+
+            if(CategoryId != null)
+            {
+                amazonOrdersContext = amazonOrdersContext
+                    .Where(i => i.Category.CategoryId == CategoryId);
+                
+            }
+            #endregion
+
+            return View(await amazonOrdersContext.ToListAsync());
+
+        }
+
         //[HttpGet]
         //public async Task<IActionResult> Index()
         //{
@@ -31,76 +74,76 @@ namespace AOWebApp.Controllers
         //public async Task<IActionResult> Index(string? searchText)
         //{
         //    if (string.IsNullOrWhiteSpace(searchText))
-        //    { 
-        //        return await Index(); 
+        //    {
+        //        return await Index();
         //    }
 
         //    var amazonDbContext = _context.Items
         //        .Include(i => i.Category)
         //        .Where(i => i.ItemName.Contains(searchText.ToLower()))
         //        .OrderBy(i => i.ItemName)
-        //        .Select(i=>i);
+        //        .Select(i => i);
         //    return View(await amazonDbContext.ToListAsync());
         //}
 
-        public static string starStringCalc(IEnumerable<int> reviewScores)
-        {
-            if (reviewScores.Count() == 0)
-            {
-                return "No data";
-            }
+        //public static string starStringCalc(IEnumerable<int> reviewScores)
+        //{
+        //    if (reviewScores.Count() == 0)
+        //    {
+        //        return "No data";
+        //    }
 
-            var reviewString = "";
+        //    var reviewString = "";
 
-            for (int i = 0; i < (int)Math.Round(reviewScores.Average()); i++)
-            {
-                reviewString += "☆";
-            }
-            return reviewString; 
-        }
+        //    for (int i = 0; i < (int)Math.Round(reviewScores.Average()); i++)
+        //    {
+        //        reviewString += "☆";
+        //    }
+        //    return reviewString; 
+        //}
 
 
-        public async Task<IActionResult> Index(string? searchText, int? categoryId)
-        {
-            ViewData["formValue"] = searchText;
+        //public async Task<IActionResult> Index(string? searchText, int? categoryId)
+        //{
+        //    ViewData["formValue"] = searchText;
 
-            var amazonDbContext = _context.Items.Include(i => i.Category).AsQueryable();
+        //    var amazonDbContext = _context.Items.Include(i => i.Category).AsQueryable();
 
-            var amazonDbCategories = _context.ItemCategories.Where(i => i.ParentCategoryId == null);
+        //    var amazonDbCategories = _context.ItemCategories.Where(i => i.ParentCategoryId == null);
 
-            ViewBag.Categories = new SelectList(amazonDbCategories.Select(i => i).ToList(),
-                nameof(ItemCategory.CategoryId),
-                nameof(ItemCategory.CategoryName),
-                categoryId);
+        //    ViewBag.Categories = new SelectList(amazonDbCategories.Select(i => i).ToList(),
+        //        nameof(ItemCategory.CategoryId),
+        //        nameof(ItemCategory.CategoryName),
+        //        categoryId);
 
-            if (!string.IsNullOrWhiteSpace(searchText))
-            {
-                amazonDbContext = amazonDbContext.Where(i => i.ItemName.Contains(searchText.ToLower()));
-            }
+        //    if (!string.IsNullOrWhiteSpace(searchText))
+        //    {
+        //        amazonDbContext = amazonDbContext.Where(i => i.ItemName.Contains(searchText.ToLower()));
+        //    }
 
-            if (categoryId.HasValue)
-            {
-                amazonDbContext = amazonDbContext.Where(i => i.Category.CategoryId == categoryId || i.Category.ParentCategoryId == categoryId);
-                
-            }
+        //    if (categoryId.HasValue)
+        //    {
+        //        amazonDbContext = amazonDbContext.Where(i => i.Category.CategoryId == categoryId || i.Category.ParentCategoryId == categoryId);
 
-            amazonDbContext = amazonDbContext.OrderBy(i => i.ItemName);
+        //    }
 
-            var amazonDbContext2 = amazonDbContext
-                .Select(i => new
-                {
-                    itemName = i.ItemName,
-                    itemCost = i.ItemCost.ToString("C"),
-                    itemId = i.ItemId,
-                    itemDescription = i.ItemDescription.Length > 100 ? i.ItemDescription.Substring(0, 100).Trim() + "..." : i.ItemDescription,
-                    itemImage = i.ItemImage,
-                    itemReviews = i.Reviews.Count(),
-                    itemStars = starStringCalc(i.Reviews.Select(i => i.Rating)),
-                });
+        //    amazonDbContext = amazonDbContext.OrderBy(i => i.ItemName);
 
-            return View(await amazonDbContext2.ToListAsync());
+        //    var amazonDbContext2 = amazonDbContext
+        //        .Select(i => new
+        //        {
+        //            itemName = i.ItemName,
+        //            itemCost = i.ItemCost.ToString("C"),
+        //            itemId = i.ItemId,
+        //            itemDescription = i.ItemDescription.Length > 100 ? i.ItemDescription.Substring(0, 100).Trim() + "..." : i.ItemDescription,
+        //            itemImage = i.ItemImage,
+        //            itemReviews = i.Reviews.Count(),
+        //            itemStars = starStringCalc(i.Reviews.Select(i => i.Rating)),
+        //        });
 
-        }
+        //    return View(await amazonDbContext2.ToListAsync());
+
+        //}
 
 
 

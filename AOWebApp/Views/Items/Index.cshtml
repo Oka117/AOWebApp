@@ -1,5 +1,5 @@
-﻿@* @model IEnumerable<AOWebApp.Models.Item> *@
-@model IEnumerable<dynamic>
+﻿@model IEnumerable<AOWebApp.Models.Item>
+@* @model IEnumerable<dynamic> *@
 
 @{
     ViewData["Title"] = "Index";
@@ -15,7 +15,7 @@
 <form method="post">
     <div class="input-group mb-3">
         <span class="input-group-text" id="inputGroup-sizing-default">Item Search</span>
-        <select name="CategoryId" class="form-control" asp-items="@(ViewBag.Categories)">
+        <select name="CategoryId" class="form-control" asp-items="@(ViewBag.CategoryList)">
             <option value="">All categories...</option>
         </select>
         <input type = "text" class="form-control" name="searchText" title="Search by item name. Max 100 chars." 
@@ -34,14 +34,14 @@
             <div class="col card container-sm" style="width: 18rem;">
 
                 <div class="card-body">
-                    <h5 class="card-title"><strong>@item.itemName</strong></h5>
-                    @* <p class="card-text">Category: @item.Category.CategoryName</p> *@
-                    <p class="card-text">Description:@item.itemDescription</p>
-                    <p class="card-text">Cost: @item.itemCost</p>
+                    <h5 class="card-title"><strong>@item.ItemName</strong></h5>
+                    <p class="card-text">Category: @item.Category.CategoryName</p>
+                    <p class="card-text">Description:@item.ItemDescription</p>
+                    <p class="card-text">Cost: @item.ItemCost</p>
             
-                    <img src="@item.itemImage" class="card-img-bottom" alt="@item.itemName" />
-                    <p class="card-text">Rate @item.itemStars from @item.itemReviews reviews.</p>
-                <a asp-controller="Items" asp-action="Details" asp-route-id="@item.itemId" class="btn btn-outline-primary">
+                    <img src="@item.ItemImage" class="card-img-bottom" alt="@item.ItemName" />
+@*                     <p class="card-text">Rate @item.ItemStars from @item.ItemReviews reviews.</p> *@
+                <a asp-controller="Items" asp-action="Details" asp-route-id="@item.ItemId" class="btn btn-outline-primary">
                 View Item Detail
                 </a>
                 </div>
