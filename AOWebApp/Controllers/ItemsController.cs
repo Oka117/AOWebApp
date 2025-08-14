@@ -23,7 +23,7 @@ namespace AOWebApp.Controllers
         // GET: Items
         [HttpGet]
         [HttpPost]
-        public async Task<IActionResult> Index(ItemSearchViewModel isvm)
+        public async Task<IActionResult> Index(ItemSearchViewModel isvm, string sortOrder)
         {
             #region  CategoriesQuery
 
@@ -62,6 +62,23 @@ namespace AOWebApp.Controllers
                 
             }
             #endregion
+
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    amazonOrdersContext = amazonOrdersContext.OrderByDescending(i => i.ItemName);
+                    break;
+                case "price_asc":
+                    amazonOrdersContext = amazonOrdersContext.OrderBy(i => i.ItemCost);
+                    break;
+                case "price_desc":
+                    amazonOrdersContext = amazonOrdersContext.OrderByDescending(i => i.ItemCost);
+                    break;
+                default:
+                    amazonOrdersContext = amazonOrdersContext.OrderBy(i => i.ItemName);
+                    break;
+            }
+
             isvm.ItemList = await amazonOrdersContext
                 .Select(i => new ItemDetail
                 {

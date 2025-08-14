@@ -5,7 +5,25 @@
 @{
     ViewData["Title"] = "Index";
 }
-
+@functions{
+    public string shortText(string text, int length = 100)
+    {
+        if (string.IsNullOrEmpty(text) || text.Length <= length)
+        {
+            return text;
+        }
+        return text.Substring(0, length) + "...";
+    }
+    public string isSelected(string value, string comp)
+    {
+        string selected = null;
+        if (value == comp)
+        {
+            selected = "selected";
+        }
+        return selected;
+    }
+}
 
 <h1 class="h2.Bootstrap heading text-center">Shop Items</h1>
 
@@ -21,6 +39,13 @@
         </select>
         <input asp-for="SearchText" class="form-control" title="Search by item name. Max 100 chars." maxlength="100" placeholder="Type here..."
                aria-label="Item search Input" aria-describedby="inputGroup-sizing-default"/>
+
+        <select name="sortOrder" class="form-control">
+            <!option value="" selected @isSelected("", ViewBag.sortOrder)>Item Name [asc]</!option>
+            <!option value="name_desc" @isSelected("name_desc", ViewBag.sortOrder)>Item Name [desc]</!option>
+            <!option value="price_asc" @isSelected("price_asc", ViewBag.sortOrder)>Item Price [asc]</!option>
+            <!option value="price_desc" @isSelected("price_desc", ViewBag.sortOrder)>Item Price [desc]</!option>
+        </select>
     </div>
 
     <input type="submit" class="btn btn-outline-primary" value="Submit"/>
