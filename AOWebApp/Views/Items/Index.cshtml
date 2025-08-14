@@ -1,4 +1,5 @@
-﻿@model IEnumerable<AOWebApp.Models.Item>
+﻿@model AOWebApp.ViewModel.ItemSearchViewModel
+@* @model IEnumerable<AOWebApp.Models.Item> *@
 @* @model IEnumerable<dynamic> *@
 
 @{
@@ -27,6 +28,18 @@
 </form>
 <br/>
 <br/>
+@if(ViewBag.SearchText != null && Model.Count() > 0)
+{   
+    <p>
+        Your search returned @Model.Count() matching item@(Model.Count() != 1? "s":"")
+    </p>
+
+} 
+else if (ViewBag.SearchText != null && Model.Count() <= 0)
+{
+    <p>Showing @Model.Count() items</p>
+    <h5 class="text-danger">Ooops, no items matched your search..</h5>
+}
 <div class="container">
     <div class="row row-cols-3 small">
         @foreach (var item in Model)
