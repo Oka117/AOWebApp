@@ -6,13 +6,23 @@
 
 <h1>Index</h1>
 
-<p>
+@* <p>
     <a asp-action="Create" class="btn btn-outline-primary mb-3">Create New</a>
-</p>
+</p> *@
 
-<form method="get" asp-action="Index">
-    <div class="input-group-lg mb-3">
-        
+<form method="post" asp-action="Index" asp-controller="Customers" class="row form-group">
+    <div class="col-3">
+        <input type="text" name="SearchText" class="form-control" placeholder="Customer Name..." />
+    </div>
+
+    <div class="col-3">
+        <select name="Suburb" class="form-control" asp-items="@ViewBag.SuburbList">
+            <option value="">All Suburbs...</option>
+        </select>
+    </div>
+    <div class="col">
+        <button type="submit" class="btn btn-outline-primary">Search</button>
+        <a asp-action="Create" class="btn btn-outline-success">Create New</a>
     </div>
 </form>
 

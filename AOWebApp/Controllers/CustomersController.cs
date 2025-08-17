@@ -28,30 +28,39 @@ namespace AOWebApp.Controllers
 
         public async Task<IActionResult> Index(string SearchText, string Suburb)
         {
-            var suburbList = await _context.Addresses
+            #region SuburbQuery
+            var SuburbList = _context.Addresses
                 .Select(a => a.Suburb)
                 .Distinct()
                 .OrderBy(s => s)
-                .ToListAsync();
+                .ToList();
 
-            ViewBag.suburbList = suburbList;
+            ViewBag.SuburbList = new SelectList(SuburbList, Suburb);
+            #endregion
+
+            #region CustomerQuery
             List<Customer> CustomerList = new List<Customer>();
             if (!string.IsNullOrEmpty(SearchText))
             {
-                CustomerList = await _context.Customers
+                var Query = _context.Customers
                     .Include(c => c.Address)
-                    .Where(c => c.FirstName.Contains(SearchText) || c.LastName.Contains(SearchText))
-                    .OrderBy(c => c.FirstName)
-                    .ToListAsync();
+                    .Where(c => SearchText.Split().Length > 1
+                    ? c.FirstName.Equals(SearchText.Split()[0]) && c.LastName.Equals(SearchText.Split()[1])
+                    : c.FirstName.StartsWith(SearchText) || c.LastName.StartsWith(SearchText));
+                if (!string.IsNullOrEmpty(Suburb))
+                {
+                    Query = Query.Where(c => c.Address.Suburb == Suburb);
+                }
+                Query = Query.OrderBy(c => SearchText.Split().Length > 1
+                    ? c.LastName.StartsWith(SearchText.Split()[0])
+                    : c.LastName.StartsWith(SearchText))
+                .ThenBy(c => SearchText.Split().Length > 1
+                    ? c.FirstName.StartsWith(SearchText.Split()[1])
+                    : c.FirstName.StartsWith(SearchText));
+
+                CustomerList = await Query.ToListAsync();
             }
-            else if (!string.IsNullOrEmpty(Suburb))
-            {
-                CustomerList = await _context.Customers
-                    .Include(c => c.Address)
-                    .Where(c => c.Address.Suburb == Suburb)
-                    .OrderBy(c => c.FirstName)
-                    .ToListAsync();
-            }
+            #endregion
             return View(CustomerList);
         }
 
