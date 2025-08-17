@@ -59,10 +59,23 @@ namespace AOWebApp.Controllers
                     query = query.Where(c => c.Address.Suburb == csvm.Suburb);
                 }
 
-                csvm.CustomerList = await query
-                    .OrderBy(c => c.FirstName)
-                    .ThenBy(c => c.LastName)
-                    .ToListAsync();
+                // Prioritize first-name matches (0) before last-name matches (1), then order by names
+                if (hasSearch)
+                {
+                    csvm.CustomerList = await query
+                        .OrderBy(c => (c.FirstName.Contains(csvm.SearchText) ? 0 : 1))
+                        .ThenBy(c => (c.LastName.Contains(csvm.SearchText) ? 0 : 1))
+                        .ThenBy(c => c.FirstName)
+                        .ThenBy(c => c.LastName)
+                        .ToListAsync();
+                }
+                else
+                {
+                    csvm.CustomerList = await query
+                        .OrderBy(c => c.FirstName)
+                        .ThenBy(c => c.LastName)
+                        .ToListAsync();
+                }
             }
 
             return View(csvm);

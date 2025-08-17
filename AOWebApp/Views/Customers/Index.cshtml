@@ -50,6 +50,11 @@
     }
 }
 
+@if (!isSearch)
+{
+    <p>Please enter a customer name or select a suburb to search.</p>
+}
+
 @if (isSearch && count > 0)
 {
     <p>
@@ -62,26 +67,22 @@ else if (isSearch && count <= 0)
     <h5 class="text-danger">Ooops, no customers matched your search..</h5>
 }
 
+@if (isSearch)
+{
 <table class="table">
     <thead>
         <tr>
             <th>
-                First Name
-            </th>
-            <th>
-                Last Name
+                @Html.DisplayNameFor(m => m.CustomerList.FirstOrDefault().FullName)
             </th>
             <th>
                 Email
             </th>
             <th>
-                Main Phone
+                @Html.DisplayNameFor(m => m.CustomerList.FirstOrDefault().ContactNumber)
             </th>
             <th>
-                Secondary Phone
-            </th>
-            <th>
-                Suburb
+                Address
             </th>
             <th></th>
         </tr>
@@ -90,22 +91,18 @@ else if (isSearch && count <= 0)
 @foreach (var item in Model.CustomerList) {
         <tr>
             <td>
-                @item.FirstName
-            </td>
-            <td>
-                @item.LastName
+                @item.FullName
             </td>
             <td>
                 @item.Email
             </td>
             <td>
-                @item.MainPhoneNumber
+                @Html.Raw(item.ContactNumber)
             </td>
             <td>
-                @item.SecondaryPhoneNumber
-            </td>
-            <td>
-                @item.Address?.Suburb
+                @if(item.Address != null){
+                    <span>@item.Address.AddressLine, @item.Address.Suburb, @item.Address.Postcode, @item.Address.Region</span>
+                }
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.CustomerId">Edit</a> |
@@ -116,3 +113,4 @@ else if (isSearch && count <= 0)
 }
     </tbody>
 </table>
+}
