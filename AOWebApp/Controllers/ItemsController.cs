@@ -28,7 +28,7 @@ namespace AOWebApp.Controllers
             #region  CategoriesQuery
 
             var Categories = _context.ItemCategories
-                .Where(ic => ic.ParentCategoryId.HasValue)
+                .Where(ic => ic.ParentCategoryId.HasValue || ic.ParentCategoryId == null)
                 // OR .Where(ic => ic.ParentCategoryId == null)
                 .OrderBy(ic => ic.CategoryName)
                 .Select(ic => new
