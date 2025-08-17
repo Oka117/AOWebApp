@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,28 +30,39 @@ namespace AOWebApp.Controllers
         {
             var suburbList = await _context.Addresses
                 .Select(a => a.Suburb)
+                .Where(s => !string.IsNullOrEmpty(s))
                 .Distinct()
                 .OrderBy(s => s)
                 .ToListAsync();
 
             ViewBag.suburbList = suburbList;
             List<Customer> CustomerList = new List<Customer>();
-            if (!string.IsNullOrEmpty(SearchText))
+
+            var hasSearch = !string.IsNullOrWhiteSpace(SearchText);
+            var hasSuburb = !string.IsNullOrWhiteSpace(Suburb);
+
+            if (hasSearch || hasSuburb)
             {
-                CustomerList = await _context.Customers
+                var query = _context.Customers
                     .Include(c => c.Address)
-                    .Where(c => c.FirstName.Contains(SearchText) || c.LastName.Contains(SearchText))
+                    .AsQueryable();
+
+                if (hasSearch)
+                {
+                    query = query.Where(c => c.FirstName.Contains(SearchText) || c.LastName.Contains(SearchText));
+                }
+
+                if (hasSuburb)
+                {
+                    query = query.Where(c => c.Address.Suburb == Suburb);
+                }
+
+                CustomerList = await query
                     .OrderBy(c => c.FirstName)
+                    .ThenBy(c => c.LastName)
                     .ToListAsync();
             }
-            else if (!string.IsNullOrEmpty(Suburb))
-            {
-                CustomerList = await _context.Customers
-                    .Include(c => c.Address)
-                    .Where(c => c.Address.Suburb == Suburb)
-                    .OrderBy(c => c.FirstName)
-                    .ToListAsync();
-            }
+
             return View(CustomerList);
         }
 

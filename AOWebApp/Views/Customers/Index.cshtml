@@ -1,4 +1,4 @@
-﻿@model IEnumerable<AOWebApp.Models.Customer>
+@model IEnumerable<AOWebApp.Models.Customer>
 
 @{
     ViewData["Title"] = "Index";
@@ -11,8 +11,21 @@
 </p>
 
 <form method="get" asp-action="Index">
-    <div class="input-group-lg mb-3">
-        
+    <div class="input-group input-group-lg mb-3">
+        <input type="text" name="SearchText" value="@ViewContext.HttpContext.Request.Query["SearchText"].ToString()" class="form-control me-2" placeholder="Customer name" />
+        <select name="Suburb" class="form-select me-2">
+            <option value="">All suburbs</option>
+            @if (ViewBag.suburbList != null)
+            {
+                foreach (var s in (System.Collections.Generic.IEnumerable<string>)ViewBag.suburbList)
+                {
+                    var selectedSuburb = ViewContext.HttpContext.Request.Query["Suburb"].ToString();
+                    var isSelected = string.Equals(selectedSuburb, s, System.StringComparison.OrdinalIgnoreCase);
+                    <option value="@s" selected="@(isSelected ? "selected" : null)">@s</option>
+                }
+            }
+        </select>
+        <button type="submit" class="btn btn-primary">Search</button>
     </div>
 </form>
 
