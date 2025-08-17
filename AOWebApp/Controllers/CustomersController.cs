@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using AOWebApp.Data;
 using AOWebApp.Models;
+using AOWebApp.ViewModel;
 
 namespace AOWebApp.Controllers
 {
@@ -26,7 +27,7 @@ namespace AOWebApp.Controllers
         //    return View(await amazonOrders2025Context.ToListAsync());
         //}
 
-        public async Task<IActionResult> Index(string SearchText, string Suburb)
+        public async Task<IActionResult> Index(CustomeSearchViewModel vm)
         {
             #region SuburbQuery
             var SuburbList = _context.Addresses
@@ -35,33 +36,33 @@ namespace AOWebApp.Controllers
                 .OrderBy(s => s)
                 .ToList();
 
-            ViewBag.SuburbList = new SelectList(SuburbList, Suburb);
+            vm.SuburbList = new SelectList(SuburbList, vm.Suburb);
             #endregion
 
             #region CustomerQuery
             List<Customer> CustomerList = new List<Customer>();
-            if (!string.IsNullOrEmpty(SearchText))
+            if (!string.IsNullOrWhiteSpace(vm.SearchText))
             {
                 var Query = _context.Customers
                     .Include(c => c.Address)
-                    .Where(c => SearchText.Split().Length > 1
-                    ? c.FirstName.Equals(SearchText.Split()[0]) && c.LastName.Equals(SearchText.Split()[1])
-                    : c.FirstName.StartsWith(SearchText) || c.LastName.StartsWith(SearchText));
-                if (!string.IsNullOrEmpty(Suburb))
+                    .Where(c => vm.SearchText.Split().Length > 1
+                    ? c.FirstName.Equals(vm.SearchText.Split()[0]) && c.LastName.Equals(vm.SearchText.Split()[1])
+                    : c.FirstName.StartsWith(vm.SearchText) || c.LastName.StartsWith(vm.SearchText));
+                if (!string.IsNullOrEmpty(vm.Suburb))
                 {
-                    Query = Query.Where(c => c.Address.Suburb == Suburb);
+                    Query = Query.Where(c => c.Address.Suburb == vm.Suburb);
                 }
-                Query = Query.OrderBy(c => SearchText.Split().Length > 1
-                    ? c.LastName.StartsWith(SearchText.Split()[0])
-                    : c.LastName.StartsWith(SearchText))
-                .ThenBy(c => SearchText.Split().Length > 1
-                    ? c.FirstName.StartsWith(SearchText.Split()[1])
-                    : c.FirstName.StartsWith(SearchText));
+                Query = Query.OrderBy(c => vm.SearchText.Split().Length > 1
+                    ? c.LastName.StartsWith(vm.SearchText.Split()[0])
+                    : c.LastName.StartsWith(vm.SearchText))
+                .ThenBy(c => vm.SearchText.Split().Length > 1
+                    ? c.FirstName.StartsWith(vm.SearchText.Split()[1])
+                    : c.FirstName.StartsWith(vm.SearchText));
 
-                CustomerList = await Query.ToListAsync();
+                vm.CustomerList = await Query.ToListAsync();
             }
             #endregion
-            return View(CustomerList);
+            return View(vm);
         }
 
         // GET: Customers/Details/5

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<AOWebApp.Models.Customer>
+﻿@model AOWebApp.ViewModel.CustomeSearchViewModel
 
 @{
     ViewData["Title"] = "Index";
@@ -10,13 +10,13 @@
     <a asp-action="Create" class="btn btn-outline-primary mb-3">Create New</a>
 </p> *@
 
-<form method="post" asp-action="Index" asp-controller="Customers" class="row form-group">
+@* <form method="post" asp-action="Index" asp-controller="Customers" class="row form-group">
     <div class="col-3">
         <input type="text" name="SearchText" class="form-control" placeholder="Customer Name..." />
     </div>
 
     <div class="col-3">
-        <select name="Suburb" class="form-control" asp-items="@ViewBag.SuburbList">
+        <select asp-for="Suburb" class="form-control" asp-items="@ViewBag.SuburbList">
             <option value="">All Suburbs...</option>
         </select>
     </div>
@@ -24,71 +24,109 @@
         <button type="submit" class="btn btn-outline-primary">Search</button>
         <a asp-action="Create" class="btn btn-outline-success">Create New</a>
     </div>
-</form>
-
-<table class="table">
-    <thead>
-        <tr>
-@*             <th>
+</form> *@
+<form method="post" asp-action="Index" asp-controller="Customers" class="row form-group">
+<div class="row mb-3">
+    <div class="col-3">
+        <input type="text" name="SearchText" class="form-control" placeholder="Name Search" title="Search customers by Name" />
+    </div>
+    <div class="col-3">
+        <select asp-for="Suburb" class="form-control" asp-items="@Model.SuburbList">
+            <option value="">All Suburbs...</option>
+        </select>
+    </div>
+    <div class="col">
+        <button type="submit" class="btn btn-outline-primary">Search</button>
+        <a asp-action="Create" class="btn btn-outline-success">Create New</a>
+    </div>
+</div>
+<</form>
+@if (!string.IsNullOrWhiteSpace(Model.SearchText))
+{
+    <p class="font-weight-bold">Matching Records Returned: @Model.CustomerList.Count</p>
+    <table class="table">
+        <thead>
+            <tr>
+                @*             <th>
                 @Html.DisplayNameFor(model => model.FirstName)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.LastName)
             </th> *@
-            <th>
-                @Html.DisplayNameFor(model => model.FullName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ContactNumber)
-            </th>
-@*             <th>
+                <th>
+                    @Html.DisplayNameFor(model => model.CustomerList[0].FullName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.CustomerList[0].Email)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.CustomerList[0].ContactNumber)
+                </th>
+                @*             <th>
                 @Html.DisplayNameFor(model => model.MainPhoneNumber)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.SecondaryPhoneNumber)
             </th> *@
-            <th>
-                @Html.DisplayNameFor(model => model.Address)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-          @*   <td>
+                <th>
+                    @Html.DisplayNameFor(model => model.CustomerList[0].Address)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.CustomerList)
+            {
+                <tr>
+                    @*   <td>
                 @Html.DisplayFor(modelItem => item.FirstName)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.LastName)
             </td> *@
-            <td>
-                @Html.DisplayFor(modelItem => item.FullName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-          @*   <td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FullName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Email)
+                    </td>
+                    @*   <td>
                 @Html.DisplayFor(modelItem => item.MainPhoneNumber)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.SecondaryPhoneNumber)
             </td> *@
-            <td>
-                    @Html.DisplayFor(modelItem => item.ContactNumber)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Address.AddressId)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.CustomerId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.CustomerId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.CustomerId">Delete</a>
-            </td>
-        </tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ContactNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Address.AddressId)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.CustomerId">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.CustomerId">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.CustomerId">Delete</a>
+                    </td>
+                    <td>
+                        @if (item.Address != null)
+                        {
+                            @item.Address.AddressLine <br />
+                            <span>@item.Address.Suburb,</span>
+                            <span>@item.Address.Postcode,</span>
+                            <span>[@item.Address.Region]</span>
+                        }
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
 }
-    </tbody>
-</table>
+else
+{
+    <div class="alert alert-info text-dark">
+        <h5>Customer Search</h5>
+        <p>To begin a search you must enter the name of a customer...</p>
+    </div>
+}

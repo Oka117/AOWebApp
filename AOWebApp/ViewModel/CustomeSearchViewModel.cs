@@ -11,7 +11,7 @@ namespace AOWebApp.ViewModel
         public string SearchText { get; set; }
         public string Suburb { get; set; }
         public SelectList SuburbList { get; set; }
-        public Lazy<List<Customer>> CustomerList { get; set; }
+        public List<Customer> CustomerList { get; set; }
         public List<String> NameList { get; set; }
 
 
