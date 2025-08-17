@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using AOWebApp.Data;
 using AOWebApp.Models;
+using AOWebApp.ViewModel;
 
 namespace AOWebApp.Controllers
 {
@@ -26,20 +27,21 @@ namespace AOWebApp.Controllers
         //    return View(await amazonOrders2025Context.ToListAsync());
         //}
 
-        public async Task<IActionResult> Index(string SearchText, string Suburb)
+        [HttpGet]
+        [HttpPost]
+        public async Task<IActionResult> Index(CustomerSearchViewModel csvm)
         {
-            var suburbList = await _context.Addresses
+            var suburbs = await _context.Addresses
                 .Select(a => a.Suburb)
-                .Where(s => !string.IsNullOrEmpty(s))
+                .Where(s => !string.IsNullOrWhiteSpace(s))
                 .Distinct()
                 .OrderBy(s => s)
                 .ToListAsync();
 
-            ViewBag.suburbList = suburbList;
-            List<Customer> CustomerList = new List<Customer>();
+            csvm.SuburbList = new SelectList(suburbs, csvm.Suburb);
 
-            var hasSearch = !string.IsNullOrWhiteSpace(SearchText);
-            var hasSuburb = !string.IsNullOrWhiteSpace(Suburb);
+            var hasSearch = !string.IsNullOrWhiteSpace(csvm.SearchText);
+            var hasSuburb = !string.IsNullOrWhiteSpace(csvm.Suburb);
 
             if (hasSearch || hasSuburb)
             {
@@ -49,21 +51,21 @@ namespace AOWebApp.Controllers
 
                 if (hasSearch)
                 {
-                    query = query.Where(c => c.FirstName.Contains(SearchText) || c.LastName.Contains(SearchText));
+                    query = query.Where(c => c.FirstName.Contains(csvm.SearchText) || c.LastName.Contains(csvm.SearchText));
                 }
 
                 if (hasSuburb)
                 {
-                    query = query.Where(c => c.Address.Suburb == Suburb);
+                    query = query.Where(c => c.Address.Suburb == csvm.Suburb);
                 }
 
-                CustomerList = await query
+                csvm.CustomerList = await query
                     .OrderBy(c => c.FirstName)
                     .ThenBy(c => c.LastName)
                     .ToListAsync();
             }
 
-            return View(CustomerList);
+            return View(csvm);
         }
 
         // GET: Customers/Details/5

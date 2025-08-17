@@ -1,78 +1,111 @@
-@model IEnumerable<AOWebApp.Models.Customer>
+@model AOWebApp.ViewModel.CustomerSearchViewModel;
 
 @{
     ViewData["Title"] = "Index";
 }
+@functions{
+    public string isSelected(string value, string comp)
+    {
+        string selected = null;
+        if (value == comp)
+        {
+            selected = "selected";
+        }
+        return selected;
+    }
+}
 
-<h1>Index</h1>
+<h1 class="h2.Bootstrap heading text-center">Customers</h1>
 
 <p>
     <a asp-action="Create" class="btn btn-outline-primary mb-3">Create New</a>
 </p>
-
-<form method="get" asp-action="Index">
-    <div class="input-group input-group-lg mb-3">
-        <input type="text" name="SearchText" value="@ViewContext.HttpContext.Request.Query["SearchText"].ToString()" class="form-control me-2" placeholder="Customer name" />
-        <select name="Suburb" class="form-select me-2">
-            <option value="">All suburbs</option>
-            @if (ViewBag.suburbList != null)
-            {
-                foreach (var s in (System.Collections.Generic.IEnumerable<string>)ViewBag.suburbList)
-                {
-                    var selectedSuburb = ViewContext.HttpContext.Request.Query["Suburb"].ToString();
-                    var isSelected = string.Equals(selectedSuburb, s, System.StringComparison.OrdinalIgnoreCase);
-                    <option value="@s" selected="@(isSelected ? "selected" : null)">@s</option>
-                }
-            }
+<br />
+<form method="post">
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Customer Search</span>
+        <select asp-for="Suburb" asp-items="Model.SuburbList" class="form-control">
+            <option value="">All suburbs...</option>
         </select>
-        <button type="submit" class="btn btn-primary">Search</button>
+        <input asp-for="SearchText" class="form-control" title="Search by first or last name. Max 100 chars." maxlength="100" placeholder="Type here..."
+               aria-label="Customer search input" aria-describedby="inputGroup-sizing-default" />
     </div>
+
+    <input type="submit" class="btn btn-outline-primary" value="Submit" />
+    <a asp-action="Index" class="btn btn-outline-danger">Reset</a>
 </form>
+<br />
+<br />
+
+@{
+    bool isSearch = false;
+    int count = 0;
+    if (Model != null)
+    {
+        isSearch = !string.IsNullOrWhiteSpace(Model.SearchText) || !string.IsNullOrWhiteSpace(Model.Suburb);
+        if (Model.CustomerList != null)
+        {
+            count = Model.CustomerList.Count;
+        }
+    }
+}
+
+@if (isSearch && count > 0)
+{
+    <p>
+        Your search returned @count matching customer@(count != 1 ? "s" : "")
+    </p>
+}
+else if (isSearch && count <= 0)
+{
+    <p>Showing @count customers</p>
+    <h5 class="text-danger">Ooops, no customers matched your search..</h5>
+}
 
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.FirstName)
+                First Name
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.LastName)
+                Last Name
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Email)
+                Email
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.MainPhoneNumber)
+                Main Phone
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.SecondaryPhoneNumber)
+                Secondary Phone
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Address)
+                Suburb
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model.CustomerList) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.FirstName)
+                @item.FirstName
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.LastName)
+                @item.LastName
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Email)
+                @item.Email
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.MainPhoneNumber)
+                @item.MainPhoneNumber
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.SecondaryPhoneNumber)
+                @item.SecondaryPhoneNumber
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Address.AddressId)
+                @item.Address?.Suburb
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.CustomerId">Edit</a> |
