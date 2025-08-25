@@ -3,52 +3,95 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap demo</title>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+    <title>Item Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
 </head>
 <body>
     <div class="container">
         <h1 class="alert alert-secondary p-2 text-center mb-3">
             Shop Items
         </h1>
+        <div class="row mb-3">
+            <div class="col-3">
+                <input name="SearchText" class="form-control" placeholder="Item Search..." />
+            </div>
+            <div class="col-3">
+                <select name="CategoryId" class="form-control">
+                    <option value="">All Categories....</option>
+                </select>
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-outline-primary">Search</button>
+            </div>
+
+        </div>
         <div class="row justify-content-start mt-2">
-            <div class="col-4 mb-2">
+            <div class="col-4 mb-2" hidden>
                 <div class="card">
-                    <img src="..." class="card-img-top" alt="...">
                     <div class="card-body">
                         <h5 class="card-title">Card title</h5>
                         <p class="card-text">Card text</p>
                         <p class="card-text">Price</p>
                     </div>
-                    <img src="..." calss="card-img-top" alt="..." />
+                    <img src="..." class="card-img-top" alt="..." />
                 </div>
             </div>
         </div>
 
         <script>
-            var row = document.querySelector(".row.justify-content-between");
+            runQuery();
 
-            for (let i = 0; i < 10; i++) {
-                let col = row.querySelector("[hideen]").cloneNode(true);
+            var btn = document.querySelector(".row.mb-3 button.btn.btn-outline-primary")
+            btn.addEventListener("click", (e) => {
+                runQuery();
+            })
 
-                col.querySelector("h5").innerText = "New Card Title";
-                let pList = col.querySelectorAll("p");
-                pList[0].innerText = "New Card Text";
-                pList[1].innerText = "New Price";
+            function runQuery() {
+                let text = document.querySelector('[name="SearchText"]').value;
 
-                let img = col.querySelector("img");
-                img.setAttribute("src", "#");
-                img.setAttribute("alt", "New Image");
-                col.hidden = false;
-
-                row.appendChild(col);
-
+                fetch(`/api/ItemsWebAPI?SearchText=${text}`)
+                    .then(response => response.json())
+                    .then(data => buildItems(data))
+                    .catch(error => console.error('Unable to get items.', error));
             }
 
 
+            fetch('api/ItemsWebAPI')
+                .then((response) => response.json())
+                .then(data => buildItems(data))
+                .catch(error => console.error('Unable to get items.', error));
+
+
+            function buildItems(data) {
+
+                var row = document.querySelector(".row.justify-content-start");
+
+                let oldCols = row.querySelectorAll("div.col-4:not([hidden])");
+                oldCols.forEach(oc => {
+                    row.removeChild(oc);
+                })
+
+                for (let i = 0; i < 10; i++) {
+                    let col = row.querySelector("[hidden]").cloneNode(true);
+
+                    col.querySelector("h5").innerText = data[i].itemName;
+                    let pList = col.querySelectorAll("p");
+                    pList[0].innerText = data[i].itemDescription;
+                    pList[1].innerText = data[i].itemCost;
+
+                    let img = col.querySelector("img");
+                    img.setAttribute("src", data[i].itemImage);
+                    img.setAttribute("alt", "Image of " + data[i].itemName);
+                    col.hidden = false;
+
+                    row.appendChild(col);
+
+                }
+            }
+
         </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
-</div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
+    </div>
 </body>
 
 </html>
