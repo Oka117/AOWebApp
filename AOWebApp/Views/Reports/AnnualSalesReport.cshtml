@@ -1,39 +1,151 @@
 ﻿@model SelectList
 
 @{
-    ViewBag.Title = "Sales Report";
+    ViewBag.Title = "Annual Sales Report";
 }
+<div class="bg-light py-2 mb-2">
+    <h2 class="text-center">Anuual Sales Report</h2>
+</div>
 
-<h2>AnnualSalesReport.cshtml</h2>
-
-<div class="row my-3">
+<div class="row mb-3">
     <div class="col-2">
-        <select id="reportSelect" name="year" asp-items="Model" class="form-control">
+        <select name="year" asp-items="@Model" class="form-control">
             <option value="">Select...</option>
         </select>
     </div>
-
-    <ul id="itemList"></ul>
 </div>
 
-<script>
-    document.querySelector('#reportSelect').addEventListener('change', (event) => {
-      let year = event.target.value;
 
-      if (year.length > 0) {
-        fetch(`/Reports/AnnualSalesReportData?year=${year}`)
-          .then(response => response.json())
-          .then(data => {
-            let ul = document.querySelector('#itemList');
-            ul.replaceChildren();
+<div>
+    <svg width="100%" height="600px" class="border border-primary rounded p-2"></svg>
+</div>
+@section scripts{
+<script type="module">
+    import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
-            data.forEach(c => {
-              let li = document.createElement('li');
-              console.log(c);
-              li.innerText = JSON.stringify(c);
-              ul.appendChild(li);
-            });
-          });
-      }
-    });
+    // 1 select SVG element
+    const svg = d3.select('svg');
+
+    // 2 determine the size of the SVG element
+    let w = svg.node().getBoundingClientRect().width;
+    let h = svg.node().getBoundingClientRect().height;
+
+    console.log('Width: ' + w);
+    console.log('Height: ' + h);
+    // 12 Chart Margins
+    const chartMargins = {
+        left: 40,
+        right: 25, 
+        top: 25,
+        bottom: 80
+    };
+
+    w = w - (chartMargins.left + chartMargins.right);
+    h = h - (chartMargins.top + chartMargins.bottom);
+    // 3. DDL Year Event listener
+    document.querySelector('.row .col-2 [name="year"]').addEventListener('change', (event) => {
+        let year = event.target.value;
+        console.log("Year: " + year);
+
+        if (year.length > 0) {
+            fetch(`/Reports/AnnualSalesReportData?year=${year}`)
+                .then(response => {
+                    console.log("response status: " + response.status);
+                        console.log("response statusText: " + response.statusText);
+                    return response.json();
+                })
+                .then(data => buildGraph(data))
+                .catch(err => console.log(err.message));
+        }
+        
+    })
+
+    // Alternate using D3:
+    // d3.select('.row .col-2 [name="year"]').on('change', (event) => {
+    //     fetch using event.target.value
+    // })
+
+    function buildGraph(dataSet) {
+        console.log(dataSet);
+        svg.selectAll(".chartGroup").remove();
+
+        // Build Graph here
+        // 4. calculate the maximum value to be displayed
+        let totalItemsRange = d3.extent(dataSet, (d, i) => d.totalItems);
+        let maxTotalItems = totalItemsRange[1];
+
+        console.log("Max totalItems: "  + maxTotalItems);
+
+        // 4. calculating the bar dimensions
+        const barMargin = 10;
+        const barWidth = w / dataSet.length;
+
+        // 8. Create a YScale
+            let yScale = d3.scaleLinear().domain([0, maxTotalItems]).range([h, 0]);
+
+        // 10. Create XScale
+            let monthArray = Array.from(dataSet, (d, i) => d.monthName);
+        console.log("month: " + monthArray)
+
+            let xScale = d3.scaleBand().domain(monthArray).range([0, w]).paddingInner(0.1)
+
+        console.log("xscale: " + xScale("March"))
+         // 12.4 create chartGroup element
+        const chartGroup = svg.append('g')
+            .classed('chartGroup', true)
+            .attr('transform', `translate(${chartMargins.left},${chartMargins.top})`);
+
+        // 5. select all 'g' elements and bind the dataSet
+        // 12.4 append the barGroups to the chartGroup
+        let barGroups = chartGroup
+            .selectAll('g')
+            .data(dataSet);
+        // 6. add new bar groups
+        let newBarGroups = barGroups.enter()
+        .append('g')
+        .attr('transform', (d, i) => {
+            return `translate(${xScale(d.monthName)}, ${yScale(d.totalItems)})`;
+            // returns transform="translate(x,y)"
+            }); // end transform
+
+        // 7. append new rectangles\
+        // 9. implement yScale
+        newBarGroups
+        .append('rect')
+        .attr('x', 0) // optional line that can be left out since 0 is the default
+        // .attr('height', (d, i) => { return h - yScale(d.totalItems); })
+        .attr('height', 0)
+        .attr('y', (d, i) => { return h - yScale(d.totalItems); })
+        .attr('width', xScale.bandwidth())
+        .style('fill', 'transparent')
+        .transition().duration((d, i) => i * 500) // perform transition over 1 s
+        .delay((d, i) => i + 200) // transition each col 1 by 1
+        .attr('y', 0)
+        .attr('height', (d, i) => { return h - yScale(d.totalItems); })
+        .style("fill", (d, i) => { return `rgb(20, 20, ${i * 15 + 80})`; })
+        // OR
+        .style("fill", (d, i) => {
+            return `hsl(240, 100%, ${(100 - (d.totalItems / maxTotalItems * 80))}%)`;
+        });
+        // 11. Create the axis and add it to the svg
+        // 12.5 Append the y-Axis to the chartGroup
+        let yAxis = d3.axisLeft(yScale); // declare the axis generator
+        chartGroup.append('g')
+            .classed('axis y', true)
+            .call(yAxis);
+        // 13 Append the x-Axis to the chartGroup
+        let xAxis = d3.axisBottom(xScale); // declare the axis generator
+        chartGroup.append('g')
+            .attr('transform', `translate(0,${h})`)
+            .classed('axis x', true)
+            .call(xAxis);
+
+        chartGroup.selectAll('.axis.x text')
+            .attr("transform", "rotate(-70)")
+            .attr("dx", "-0.8em")
+            .attr("dy", "0.25em")
+            .style("text-anchor", "end") // pull labels to bottom
+            .style("font-size", "0.9em"); // set font size
+            }
 </script>
+}
