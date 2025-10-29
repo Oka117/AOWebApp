@@ -8,6 +8,7 @@ import Home from './routes/Home';
 import Contact from './routes/Contact';
 import CardListSearch from './components/CardListSearch';
 import CardDetail from './components/CardDetail';
+import Graph from './components/Graph';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -18,6 +19,7 @@ root.render(
                 <Route path="/" element={<Home />} />
                 <Route path="Home" element={<Home />} />
                 <Route path="Contact" element={<Contact />} />
+                <Route path="Graph" element={<Graph />} />
                 <Route path="Products" element={<CardListSearch />} />
                 <Route path="" element={<Home />} />
                 <Route path="*" element={<Home />} />
